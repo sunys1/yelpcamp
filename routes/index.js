@@ -17,6 +17,8 @@ router.post("/register", function(req, res) {
     var newUser = new User({username: req.body.username});
     User.register(newUser, req.body.password, function(err, user){
          if(err){
+                 //"return" stops the function at this point when it's triggered.
+                 //The rest of the codes will be executed.
                  return res.render("register", {"error": err.message});
          }
          passport.authenticate("local")(req, res, function(){

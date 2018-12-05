@@ -18,5 +18,4 @@ var campgroundSchema = new mongoose.Schema({
     }]
 });
 //make a model that compiles the campgroundSchema and contains a bunch of methods
-
 module.exports = mongoose.model("Campground", campgroundSchema); 
