@@ -10,6 +10,7 @@ var express             = require("express"),
     User                = require("./models/user"),
     seedDB              = require("./seeds"),
     Comment             = require("./models/comment");
+require('dotenv').config();
     
 var commentRoutes = require("./routes/comments"),
     campgroundRoutes = require("./routes/campgrounds"),
