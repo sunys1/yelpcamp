@@ -23,28 +23,37 @@ router.get("/", function(req, res){
         })
 })
 
-router.post("/", isLoggedIn, function(req, res){
-            //get data from form and add to campgrounds array
-            //redirect back to camgrounds page
-            var name = req.body.name;
-            var price = req.body.price;
-            var image = req.body.image;
-            var description = req.body.description;
-            var author = {
-                       id: req.user._id,
-                       username: req.user.username
-            };
-            var newCampground = {name: name, price: price, image: image, description: description, author: author};
-            //create a new campground and save to database
-            Campground.create(newCampground, function(err, campground){
-                  if(err){
-                         console.log(err);
-                  }else{
-                         //redirect back to campgrounds page     
-                         res.redirect("/campgrounds");
-                  }
-            })
-})
+//CREATE - add new campground to DB
+router.post("/", middleware.isLoggedIn, function(req, res){
+  // get data from form and add to campgrounds array
+  var name = req.body.name;
+  var image = req.body.image;
+  var desc = req.body.description;
+  var author = {
+      id: req.user._id,
+      username: req.user.username
+  }
+  geocoder.geocode(req.body.location, function (err, data) {
+    if (err || !data.length) {
+      req.flash('error', 'Invalid address');
+      return res.redirect('back');
+    }
+    var lat = data[0].latitude;
+    var lng = data[0].longitude;
+    var location = data[0].formattedAddress;
+    var newCampground = {name: name, image: image, description: desc, author:author, location: location, lat: lat, lng: lng};
+    // Create a new campground and save to DB
+    Campground.create(newCampground, function(err, newlyCreated){
+        if(err){
+            console.log(err);
+        } else {
+            //redirect back to campgrounds page
+            console.log(newlyCreated);
+            res.redirect("/campgrounds");
+        }
+    });
+  });
+});
 //New - show form to create new campground
 router.get("/new", middleware.isLoggedIn, function(req, res){
             res.render("campgrounds/new");
@@ -64,13 +73,6 @@ router.get("/:id", function(req, res){
             }
        });
 })
-function isLoggedIn(req, res, next){
-        if(req.isAuthenticated()){
-            return next();
-        }else{
-            res.redirect("/login");
-        }
-}
 // Edit campground route
 router.get("/:id/edit", middleware.checkCampgroundOwnership, function(req, res){
         Campground.findById(req.params.id, function(err, foundCampground){
